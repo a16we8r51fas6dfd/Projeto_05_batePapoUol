@@ -35,23 +35,54 @@ header > ion-icon {
 
 main {
     width: 375px;
-    height: 100vh;
+    height: 100%;
 
     background-color: #e5e5e5;
 
     padding-top: 106px;
+    padding-bottom: 106px;
 }
 
-.message {
+.mensagem-box {
     width: 375px;
-    height: 40px;
-
-    background-color: #dcdcdc;
 
     display: flex;
     justify-content: flex-start;
     align-items: center;
 
+    margin-bottom: 4px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 8px;
+    padding-right: 8px;
+
+    font-size: 14px;
+    line-height: 20px;
+
+    border-radius: 2px;
+}
+
+.message {
+    background-color: #ffffff;
+}
+
+.status {
+    background-color: #dcdcdc;
+}
+
+.private_message {
+    background-color: #FFDEDE;
+}
+
+
+
+.mensagem-box span {
+    color: #AAAAAA;
+    padding-right: 8px;
+}
+
+.mensagem-box strong {
+    font-weight: 700;
 }
 
 footer {

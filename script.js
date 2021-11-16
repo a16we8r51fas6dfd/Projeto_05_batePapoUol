@@ -1,3 +1,4 @@
+let ultimaMensagemSalva = ""
 const mensagemInput = document.querySelector("footer > input")
 mensagemInput.value = ""
 
@@ -11,27 +12,21 @@ const requisicaoLogin = axios.post("https://mock-api.driven.com.br/api/v4/uol/pa
 promessaMensagens.then(carregarMensagens)
 promessaMensagens.catch(console.log("deu ruim nas mensagens"))
 
-requisicaoLogin.then(sucessoLogin)
+requisicaoLogin.then(recarregarMensagens)
 requisicaoLogin.catch(falhaLogin)
 
-function sucessoLogin() {
-    console.log("entramos")
-}
-
 function falhaLogin() {
-    usuario = prompt("nome de usuário já em uso, tentar outro")
+    usuario = prompt("nome de usuário já em uso, tentar outro nome")
     usuarioObj = {name: usuario}
 
     const requisicaoLogin = axios.post("https://mock-api.driven.com.br/api/v4/uol/participants ", usuarioObj)
 
-    requisicaoLogin.then(sucessoLogin)
+    requisicaoLogin.then(recarregarMensagens)
     requisicaoLogin.catch(falhaLogin)
 }
 
 function carregarMensagens(resposta) {
     const mensagensEl = document.querySelector("main > ul")
-
-    let ultimaMensagemTexto = ""
 
     mensagensEl.innerHTML = ""
 
@@ -39,13 +34,13 @@ function carregarMensagens(resposta) {
     for(let i = 0; i < resposta.data.length; i++) {
         if(i !== resposta.data.length - 1 && (resposta.data[i].to === usuario || resposta.data[i].to === "Todos")) {
             mensagensEl.innerHTML += `
-            <li class="mensagem-box ${resposta.data[i].type}">
+            <li class="mensagem-box ${resposta.data[i].type}" data-identifier="message">
             
                 <p><span>(${resposta.data[i].time})</span><strong>${resposta.data[i].from}</strong> para <strong>${resposta.data[i].to}</strong>: ${resposta.data[i].text}</p>
                 </li>`
             } else if(i === resposta.data.length - 1 && (resposta.data[i].to === usuario || resposta.data[i].to === "Todos")) {
                 mensagensEl.innerHTML += `
-                <li class="mensagem-box ${resposta.data[i].type} ultima-mensagem">
+                <li class="mensagem-box ${resposta.data[i].type} ultima-mensagem" data-identifier="message">
                 
                 <p><span>(${resposta.data[i].time})</span><strong>${resposta.data[i].from}</strong> para <strong>${resposta.data[i].to}</strong>: ${resposta.data[i].text}</p>
                 </li>`
@@ -53,15 +48,14 @@ function carregarMensagens(resposta) {
     }
         
     const ultimaMensagem = document.querySelector(".ultima-mensagem")
-    
-    if(ultimaMensagemTexto !== ultimaMensagem.textContent) {
-        ultimaMensagem.scrollIntoView()
-        ultimaMensagemTexto = ultimaMensagem.textContent
-    }
-    
-        
-}
 
+    if(ultimaMensagem.innerHTML !== ultimaMensagemSalva){
+        ultimaMensagem.scrollIntoView()
+    }
+
+    ultimaMensagemSalva = ultimaMensagem.innerHTML
+    
+}
 
 setInterval(recarregarMensagens, 3000)
 
@@ -71,9 +65,7 @@ function recarregarMensagens() {
     promessa.then(carregarMensagens)
 }
 
-//************************* MANTER CONEXÃO ***************************//
 
-setInterval(manterConexao, 5000)
 
 function manterConexao() {
     const manterPromessa = axios.post("https://mock-api.driven.com.br/api/v4/uol/status", usuarioObj)
@@ -82,6 +74,14 @@ function manterConexao() {
     manterPromessa.catch(conexaoDoidera)
 }
 
+function checarAtividade() {
+    if(document.hasFocus()) {
+        manterConexao()
+    }
+}
+
+setInterval(checarAtividade, 5000)
+
 function conexaoMantida() {
     console.log("conexão mantida")
 }
@@ -89,8 +89,6 @@ function conexaoMantida() {
 function conexaoDoidera() {
     console.log("caimos")
 }
-
-//************************* ENVIAR MENSAGEM ***************************//
 
 function enviarMensagem() {
     const mensagem = document.querySelector("footer > input").value
@@ -101,13 +99,15 @@ function enviarMensagem() {
         text: mensagem,
         type: "message"
     }
-
+    
     const mensagemPost = axios.post("https://mock-api.driven.com.br/api/v4/uol/messages", mensagemObj)
     
     mensagemInput.value = ""
     
     mensagemPost.then(recarregarMensagens)
-    mensagemPost.catch(console.log("merda ao enviar"))
+    mensagemPost.catch(recarregarPagina)
 }
 
-//************************* ENVIAR MENSAGEM ***************************//
+function recarregarPagina() {
+    window.location.reload()
+}

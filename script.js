@@ -1,31 +1,39 @@
-const usuario = prompt("fala seu nome pro tio aqui")
-const usuarioObj = {name: usuario}
+const mensagemInput = document.querySelector("footer > input")
+mensagemInput.value = ""
 
-const promessa = axios.get("https://mock-api.driven.com.br/api/v4/uol/messages")
 
+let usuario = prompt("fala seu nome pro tio aqui")
+let usuarioObj = {name: usuario}
+
+const promessaMensagens = axios.get("https://mock-api.driven.com.br/api/v4/uol/messages")
 const requisicaoLogin = axios.post("https://mock-api.driven.com.br/api/v4/uol/participants ", usuarioObj)
 
-promessa.then(carregarMensagens)
-promessa.catch(promessaDoidera)
+promessaMensagens.then(carregarMensagens)
+promessaMensagens.catch(console.log("deu ruim nas mensagens"))
 
-function promessaDoidera() {
-    console.log("deu tudo errado")
+requisicaoLogin.then(sucessoLogin)
+requisicaoLogin.catch(falhaLogin)
+
+function sucessoLogin() {
+    console.log("entramos")
 }
 
-requisicaoLogin.then(requisicaoIriri)
-requisicaoLogin.catch(requisicaoDoidera)
+function falhaLogin() {
+    usuario = prompt("nome de usuário já em uso, tentar outro")
+    usuarioObj = {name: usuario}
 
-function requisicaoIriri(resposta) {
-    console.log("iriri é o robs")
-}
+    const requisicaoLogin = axios.post("https://mock-api.driven.com.br/api/v4/uol/participants ", usuarioObj)
 
-function requisicaoDoidera() {
-    console.log("deu doidera no login")
+    requisicaoLogin.then(sucessoLogin)
+    requisicaoLogin.catch(falhaLogin)
 }
 
 function carregarMensagens(resposta) {
-    console.log(resposta.data)
     const mensagensEl = document.querySelector("main > ul")
+
+    let ultimaMensagemTexto = ""
+
+    mensagensEl.innerHTML = ""
 
     mensagensEl.innerHTML = ""
     for(let i = 0; i < resposta.data.length; i++) {
@@ -42,11 +50,18 @@ function carregarMensagens(resposta) {
                 <p><span>(${resposta.data[i].time})</span><strong>${resposta.data[i].from}</strong> para <strong>${resposta.data[i].to}</strong>: ${resposta.data[i].text}</p>
                 </li>`
             }
-        }
+    }
         
     const ultimaMensagem = document.querySelector(".ultima-mensagem")
-    ultimaMensagem.scrollIntoView()
+    
+    if(ultimaMensagemTexto !== ultimaMensagem.textContent) {
+        ultimaMensagem.scrollIntoView()
+        ultimaMensagemTexto = ultimaMensagem.textContent
+    }
+    
+        
 }
+
 
 setInterval(recarregarMensagens, 3000)
 
@@ -88,7 +103,11 @@ function enviarMensagem() {
     }
 
     const mensagemPost = axios.post("https://mock-api.driven.com.br/api/v4/uol/messages", mensagemObj)
-
+    
+    mensagemInput.value = ""
+    
+    mensagemPost.then(recarregarMensagens)
+    mensagemPost.catch(console.log("merda ao enviar"))
 }
 
 //************************* ENVIAR MENSAGEM ***************************//
